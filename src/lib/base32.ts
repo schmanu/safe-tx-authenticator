@@ -29,32 +29,23 @@ export const deriveBase32Key = async (
   const secretBytes = decodeBase32(secretBase32.toUpperCase());
 
   // Convert hex string into bytes
-  const hexBytes = new Uint8Array(
+  const txHashBytes = new Uint8Array(
     hexInput.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
   );
 
-  // Import key material for HKDF
-  const keyMaterial = await crypto.subtle.importKey(
+  // Import base key for HMAC
+  const cryptoKey = await crypto.subtle.importKey(
     "raw",
     new Uint8Array(secretBytes),
-    { name: "HKDF" },
+    { name: "HMAC", hash: "SHA-256" },
     false,
-    ["deriveBits"]
+    ["sign"]
   );
 
-  // Perform HKDF
-  const derivedBits = await crypto.subtle.deriveBits(
-    {
-      name: "HKDF",
-      hash: "SHA-256",
-      salt: hexBytes,
-      info: new TextEncoder().encode("TOTP-key-derivation"),
-    },
-    keyMaterial,
-    80 // 10 bytes * 8 bits per byte
-  );
+  // Sign the txHash to derive K'
+  const derived = await crypto.subtle.sign("HMAC", cryptoKey, txHashBytes);
 
   // Convert derived bits to Base32
-  const derivedKeyBytes = new Uint8Array(derivedBits);
+  const derivedKeyBytes = new Uint8Array(derived);
   return encodeBase32(derivedKeyBytes).replace(/=/g, ""); // Remove padding
 };

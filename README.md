@@ -1,6 +1,6 @@
 _Disclaimer: This project is just a Proof of concept. Neither the code nor the cryptographic approach has actually been reviewed. This should not be used in production_
 
-## Overview
+# Overview
 
 This project is a proof of concept for adding a off-chain multifactor authentication on top of Safe signers using a TOTP Authenticator App.
 
@@ -8,15 +8,9 @@ The idea is to close the gap between web app and mobile app by enforcing Multifa
 In order to submit a signature for a Safe transaction you would need to send the signature along a TOTP code. Only if both are valid the signature will be accepted and stored.
 This forces users to use different devices (e.g. Web App and Authenticator App) similar to a banking TAN. The TOTP code generation incorporates a secret that will be exchanged with the Authenticator device during registration as well as the safe transaction data. This way a TOTP code is always only valid for a specific transaction.
 
-## How it works
+For more details about the algorithm, see [THTP.md](./THTP.md).
 
-- The device and backend exchange a Base32 secret key.
-- Using this device we derive an HKDF key
-- We derive a new key using the secret with the Safe transaction hash as salt
-- Using this new key and the current epoch we calculate a TOTP code
-- The backend (CGW) does the same to verify that the TOTP code is correct and rejects the signature otherwise
-
-## Running it locally
+# Running it locally
 
 Install the dependencies:
 
